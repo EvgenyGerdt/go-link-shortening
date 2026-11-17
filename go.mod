@@ -1,3 +1,3 @@
 module github.com/EvgenyGerdt/go-link-shortening.git
 
-go 1.27.4
+go 1.27.0
