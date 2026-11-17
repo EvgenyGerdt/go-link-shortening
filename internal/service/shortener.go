@@ -8,7 +8,7 @@ import (
 
 type LinkRepository interface {
 	Create(id, url string) error
-	GetById(id string) (string, error)
+	GetByID(id string) (string, error)
 }
 
 type Shortener struct {
@@ -41,5 +41,5 @@ func (s *Shortener) ShortenURL(url string) (string, error) {
 }
 
 func (s *Shortener) ResolveURL(id string) (string, error) {
-	return s.repo.GetById(id)
+	return s.repo.GetByID(id)
 }

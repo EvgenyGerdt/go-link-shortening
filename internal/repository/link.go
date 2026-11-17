@@ -33,7 +33,7 @@ func (r *LinkRepository) Create(id, url string) error {
 	return nil
 }
 
-func (r *LinkRepository) GetById(id string) (string, error) {
+func (r *LinkRepository) GetByID(id string) (string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
