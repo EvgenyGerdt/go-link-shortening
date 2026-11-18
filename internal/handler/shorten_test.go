@@ -106,6 +106,7 @@ func TestHandler_ShortenURL(t *testing.T) {
 
 			handler := &Handler{
 				service: service,
+				baseURL: "http://short.test",
 			}
 
 			router := gin.New()
