@@ -1,15 +1,14 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/EvgenyGerdt/go-link-shortening.git/internal/handler"
 	"github.com/EvgenyGerdt/go-link-shortening.git/internal/repository"
 	"github.com/EvgenyGerdt/go-link-shortening.git/internal/service"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	mux := http.NewServeMux()
+	router := gin.Default()
 
 	// Repositories
 	linkRepo := repository.NewLinkRepository()
@@ -18,9 +17,9 @@ func main() {
 	// Handlers
 	h := handler.NewHandler(shortenerService)
 
-	mux.HandleFunc("POST /", h.ShortenURL)
-	mux.HandleFunc("GET /{id}", h.ResolveURL)
-	err := http.ListenAndServe(":8080", mux)
+	router.POST("/", h.ShortenURL)
+	router.GET("/{id}", h.ResolveURL)
+	err := router.Run(":8080")
 
 	if err != nil {
 		panic(err)

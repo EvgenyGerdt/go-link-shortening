@@ -2,21 +2,23 @@ package handler
 
 import (
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) ResolveURL(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+func (h *Handler) ResolveURL(c *gin.Context) {
+	id := c.Param("id")
 
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	url, err := h.service.ResolveURL(id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Location", url)
-	w.WriteHeader(http.StatusTemporaryRedirect)
+	c.Header("Location", url)
+	c.Status(http.StatusCreated)
 }

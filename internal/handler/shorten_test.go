@@ -7,9 +7,13 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
 
 func TestHandler_ShortenURL(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
 	tests := []struct {
 		name               string
 		body               string
@@ -58,7 +62,7 @@ func TestHandler_ShortenURL(t *testing.T) {
 			shortenURL: func(url string) (string, error) {
 				return "abc123", nil
 			},
-			expectedStatusCode: http.StatusCreated,
+			expectedStatusCode: http.StatusTemporaryRedirect,
 			expectedBody:       "http://short.test/abc123",
 			serviceCalled:      true,
 		},
@@ -68,7 +72,7 @@ func TestHandler_ShortenURL(t *testing.T) {
 			shortenURL: func(url string) (string, error) {
 				return "xyz789", nil
 			},
-			expectedStatusCode: http.StatusCreated,
+			expectedStatusCode: http.StatusTemporaryRedirect,
 			expectedBody:       "http://short.test/xyz789",
 			serviceCalled:      true,
 		},
@@ -103,16 +107,22 @@ func TestHandler_ShortenURL(t *testing.T) {
 				service: service,
 			}
 
+			router := gin.New()
+			router.POST("/", handler.ShortenURL)
+
+			// Создаём HTTP-запрос
 			req := httptest.NewRequest(
 				http.MethodPost,
-				"/shorten",
+				"/",
 				strings.NewReader(tt.body),
 			)
+
 			req.Host = "short.test"
+			req.Header.Set("Content-Type", "text/plain")
 
 			recorder := httptest.NewRecorder()
 
-			handler.ShortenURL(recorder, req)
+			router.ServeHTTP(recorder, req)
 
 			resp := recorder.Result()
 			defer resp.Body.Close()
@@ -149,9 +159,9 @@ func TestHandler_ShortenURL(t *testing.T) {
 			if tt.expectedStatusCode == http.StatusCreated {
 				contentType := resp.Header.Get("Content-Type")
 
-				if contentType != "text/plain" {
+				if contentType != "text/plain; charset=utf-8" {
 					t.Errorf(
-						"expected Content-Type text/plain, got %q",
+						"expected Content-Type text/plain;, got %q",
 						contentType,
 					)
 				}

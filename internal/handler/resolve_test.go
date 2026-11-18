@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
 
 func TestHandler_ResolveURL(t *testing.T) {
@@ -49,14 +51,25 @@ func TestHandler_ResolveURL(t *testing.T) {
 			service := &mockURLService{
 				resolveURL: test.resolveURL,
 			}
+
 			handler := &Handler{
 				service: service,
 			}
-			req := httptest.NewRequest(http.MethodGet, "/"+test.id, nil)
-			req.SetPathValue("id", test.id)
 
+			router := gin.New()
+			router.GET("/:id", handler.ResolveURL)
+
+			req := httptest.NewRequest(
+				http.MethodGet,
+				"/"+test.id,
+				nil,
+			)
+
+			// Создаём recorder
 			recorder := httptest.NewRecorder()
-			handler.ResolveURL(recorder, req)
+
+			// Передаём запрос в Gin
+			router.ServeHTTP(recorder, req)
 
 			resp := recorder.Result()
 			defer func(Body io.ReadCloser) {
@@ -65,12 +78,21 @@ func TestHandler_ResolveURL(t *testing.T) {
 					t.Fatal(err)
 				}
 			}(resp.Body)
+
 			if resp.StatusCode != test.expectedStatusCode {
-				t.Errorf("expected status %d, got %d", test.expectedStatusCode, resp.StatusCode)
+				t.Errorf(
+					"expected status %d, got %d",
+					test.expectedStatusCode,
+					resp.StatusCode,
+				)
 			}
 
 			if location := resp.Header.Get("Location"); location != test.expectedURL {
-				t.Errorf("expected url %s, got %s", test.expectedURL, location)
+				t.Errorf(
+					"expected url %s, got %s",
+					test.expectedURL,
+					location,
+				)
 			}
 		})
 	}
