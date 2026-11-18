@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,6 +10,8 @@ import (
 )
 
 func TestHandler_ResolveURL(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
 	tests := []struct {
 		name               string
 		id                 string
@@ -56,9 +57,6 @@ func TestHandler_ResolveURL(t *testing.T) {
 				service: service,
 			}
 
-			router := gin.New()
-			router.GET("/:id", handler.ResolveURL)
-
 			req := httptest.NewRequest(
 				http.MethodGet,
 				"/"+tt.id,
@@ -67,15 +65,24 @@ func TestHandler_ResolveURL(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 
-			router.ServeHTTP(recorder, req)
+			if tt.id == "" {
+				ctx, _ := gin.CreateTestContext(recorder)
+
+				ctx.Request = req
+				ctx.Params = gin.Params{
+					{Key: "id", Value: ""},
+				}
+
+				handler.ResolveURL(ctx)
+			} else {
+				router := gin.New()
+				router.GET("/:id", handler.ResolveURL)
+
+				router.ServeHTTP(recorder, req)
+			}
 
 			resp := recorder.Result()
-			defer func(Body io.ReadCloser) {
-				err := Body.Close()
-				if err != nil {
-					t.Fatal(err)
-				}
-			}(resp.Body)
+			defer resp.Body.Close()
 
 			if resp.StatusCode != tt.expectedStatusCode {
 				t.Errorf(

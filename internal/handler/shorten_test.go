@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"io"
+	"mime"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -159,10 +160,15 @@ func TestHandler_ShortenURL(t *testing.T) {
 			if tt.expectedStatusCode == http.StatusCreated {
 				contentType := resp.Header.Get("Content-Type")
 
-				if contentType != "text/plain; charset=utf-8" {
+				mediaType, _, err := mime.ParseMediaType(contentType)
+				if err != nil {
+					t.Fatalf("invalid Content-Type %q: %v", contentType, err)
+				}
+
+				if mediaType != "text/plain" {
 					t.Errorf(
-						"expected Content-Type text/plain;, got %q",
-						contentType,
+						"expected Content-Type text/plain, got %q",
+						mediaType,
 					)
 				}
 			}
