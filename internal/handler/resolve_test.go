@@ -74,6 +74,7 @@ func TestHandler_ResolveURL(t *testing.T) {
 
 			handler := &Handler{
 				service: service,
+				baseURL: "http://short.test",
 			}
 
 			router := gin.New()
