@@ -18,7 +18,7 @@ func main() {
 	h := handler.NewHandler(shortenerService)
 
 	router.POST("/", h.ShortenURL)
-	router.GET("/{id}", h.ResolveURL)
+	router.GET("/:id", h.ResolveURL)
 	err := router.Run(":8080")
 
 	if err != nil {
