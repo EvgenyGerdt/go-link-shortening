@@ -43,5 +43,5 @@ func (h *Handler) ShortenURL(c *gin.Context) {
 
 	shortURL := fmt.Sprintf("http://%s/%s", c.Request.Host, id)
 	c.Header("Content-Type", "text/plain")
-	c.String(http.StatusTemporaryRedirect, shortURL)
+	c.String(http.StatusCreated, shortURL)
 }

@@ -46,10 +46,10 @@ func TestHandler_ResolveURL(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			service := &mockURLService{
-				resolveURL: test.resolveURL,
+				resolveURL: tt.resolveURL,
 			}
 
 			handler := &Handler{
@@ -61,14 +61,12 @@ func TestHandler_ResolveURL(t *testing.T) {
 
 			req := httptest.NewRequest(
 				http.MethodGet,
-				"/"+test.id,
+				"/"+tt.id,
 				nil,
 			)
 
-			// Создаём recorder
 			recorder := httptest.NewRecorder()
 
-			// Передаём запрос в Gin
 			router.ServeHTTP(recorder, req)
 
 			resp := recorder.Result()
@@ -79,18 +77,18 @@ func TestHandler_ResolveURL(t *testing.T) {
 				}
 			}(resp.Body)
 
-			if resp.StatusCode != test.expectedStatusCode {
+			if resp.StatusCode != tt.expectedStatusCode {
 				t.Errorf(
 					"expected status %d, got %d",
-					test.expectedStatusCode,
+					tt.expectedStatusCode,
 					resp.StatusCode,
 				)
 			}
 
-			if location := resp.Header.Get("Location"); location != test.expectedURL {
+			if location := resp.Header.Get("Location"); location != tt.expectedURL {
 				t.Errorf(
 					"expected url %s, got %s",
-					test.expectedURL,
+					tt.expectedURL,
 					location,
 				)
 			}

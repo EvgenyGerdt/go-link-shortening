@@ -62,7 +62,7 @@ func TestHandler_ShortenURL(t *testing.T) {
 			shortenURL: func(url string) (string, error) {
 				return "abc123", nil
 			},
-			expectedStatusCode: http.StatusTemporaryRedirect,
+			expectedStatusCode: http.StatusCreated,
 			expectedBody:       "http://short.test/abc123",
 			serviceCalled:      true,
 		},
@@ -72,7 +72,7 @@ func TestHandler_ShortenURL(t *testing.T) {
 			shortenURL: func(url string) (string, error) {
 				return "xyz789", nil
 			},
-			expectedStatusCode: http.StatusTemporaryRedirect,
+			expectedStatusCode: http.StatusCreated,
 			expectedBody:       "http://short.test/xyz789",
 			serviceCalled:      true,
 		},

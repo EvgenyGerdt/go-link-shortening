@@ -20,5 +20,5 @@ func (h *Handler) ResolveURL(c *gin.Context) {
 	}
 
 	c.Header("Location", url)
-	c.Status(http.StatusCreated)
+	c.Status(http.StatusTemporaryRedirect)
 }
