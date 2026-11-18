@@ -14,7 +14,7 @@ func TestHandler_ResolveURL(t *testing.T) {
 		id                 string
 		resolveURL         func(string) (string, error)
 		expectedStatusCode int
-		expectedUrl        string
+		expectedURL        string
 	}{
 		{
 			name: "missing id",
@@ -40,7 +40,7 @@ func TestHandler_ResolveURL(t *testing.T) {
 				return "http://example.com", nil
 			},
 			expectedStatusCode: http.StatusTemporaryRedirect,
-			expectedUrl:        "http://example.com",
+			expectedURL:        "http://example.com",
 		},
 	}
 
@@ -69,8 +69,8 @@ func TestHandler_ResolveURL(t *testing.T) {
 				t.Errorf("expected status %d, got %d", test.expectedStatusCode, resp.StatusCode)
 			}
 
-			if location := resp.Header.Get("Location"); location != test.expectedUrl {
-				t.Errorf("expected url %s, got %s", test.expectedUrl, location)
+			if location := resp.Header.Get("Location"); location != test.expectedURL {
+				t.Errorf("expected url %s, got %s", test.expectedURL, location)
 			}
 		})
 	}
