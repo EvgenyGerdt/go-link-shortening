@@ -18,15 +18,13 @@ func TestHandler_ResolveURL(t *testing.T) {
 		resolveURL         func(string) (string, error)
 		expectedStatusCode int
 		expectedURL        string
+		serviceCalled      bool
 	}{
 		{
-			name: "missing id",
-			id:   "",
-			resolveURL: func(id string) (string, error) {
-				t.Fatal("service should not be called")
-				return "", nil
-			},
-			expectedStatusCode: http.StatusBadRequest,
+			name:               "missing id",
+			id:                 "",
+			expectedStatusCode: http.StatusNotFound,
+			serviceCalled:      false,
 		},
 		{
 			name: "service error",
@@ -35,6 +33,7 @@ func TestHandler_ResolveURL(t *testing.T) {
 				return "", errors.New("URL not found")
 			},
 			expectedStatusCode: http.StatusBadRequest,
+			serviceCalled:      true,
 		},
 		{
 			name: "success",
@@ -44,18 +43,41 @@ func TestHandler_ResolveURL(t *testing.T) {
 			},
 			expectedStatusCode: http.StatusTemporaryRedirect,
 			expectedURL:        "http://example.com",
+			serviceCalled:      true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			called := false
+
 			service := &mockURLService{
-				resolveURL: tt.resolveURL,
+				resolveURL: func(id string) (string, error) {
+					called = true
+
+					if id != tt.id {
+						t.Errorf(
+							"expected id %q, got %q",
+							tt.id,
+							id,
+						)
+					}
+
+					if tt.resolveURL == nil {
+						t.Fatal("unexpected service call")
+						return "", nil
+					}
+
+					return tt.resolveURL(id)
+				},
 			}
 
 			handler := &Handler{
 				service: service,
 			}
+
+			router := gin.New()
+			router.GET("/:id", handler.ResolveURL)
 
 			req := httptest.NewRequest(
 				http.MethodGet,
@@ -65,21 +87,7 @@ func TestHandler_ResolveURL(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 
-			if tt.id == "" {
-				ctx, _ := gin.CreateTestContext(recorder)
-
-				ctx.Request = req
-				ctx.Params = gin.Params{
-					{Key: "id", Value: ""},
-				}
-
-				handler.ResolveURL(ctx)
-			} else {
-				router := gin.New()
-				router.GET("/:id", handler.ResolveURL)
-
-				router.ServeHTTP(recorder, req)
-			}
+			router.ServeHTTP(recorder, req)
 
 			resp := recorder.Result()
 			defer resp.Body.Close()
@@ -92,9 +100,17 @@ func TestHandler_ResolveURL(t *testing.T) {
 				)
 			}
 
+			if called != tt.serviceCalled {
+				t.Errorf(
+					"expected service called %t, got %t",
+					tt.serviceCalled,
+					called,
+				)
+			}
+
 			if location := resp.Header.Get("Location"); location != tt.expectedURL {
 				t.Errorf(
-					"expected url %s, got %s",
+					"expected Location %q, got %q",
 					tt.expectedURL,
 					location,
 				)
