@@ -1,6 +1,8 @@
 package handler
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func (h *Handler) ResolveURL(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")

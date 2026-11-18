@@ -10,6 +10,7 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
+
 	// Repositories
 	linkRepo := repository.NewLinkRepository()
 	// Services

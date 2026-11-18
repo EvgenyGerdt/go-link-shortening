@@ -4,17 +4,35 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 func (h *Handler) ShortenURL(w http.ResponseWriter, r *http.Request) {
-	url, err := io.ReadAll(r.Body)
+	linkStr, err := io.ReadAll(r.Body)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	id, err := h.service.ShortenURL(string(url))
+	link, err := url.Parse(string(linkStr))
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if link.Scheme != "http" && link.Scheme != "https" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if link.Hostname() == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	id, err := h.service.ShortenURL(string(linkStr))
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
