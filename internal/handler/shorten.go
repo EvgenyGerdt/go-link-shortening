@@ -41,7 +41,9 @@ func (h *Handler) ShortenURL(c *gin.Context) {
 		return
 	}
 
-	shortURL := fmt.Sprintf("http://%s/%s", c.Request.Host, id)
+	fmt.Printf("Handler baseURL: %q\n", h.baseURL)
+
+	shortURL := fmt.Sprintf("http://%s/%s", h.baseURL, id)
 	c.Header("Content-Type", "text/plain")
 	c.String(http.StatusCreated, shortURL)
 }

@@ -9,10 +9,12 @@ type URLService interface {
 
 type Handler struct {
 	service URLService
+	baseURL string
 }
 
-func NewHandler(s *service.Shortener) *Handler {
+func NewHandler(s *service.Shortener, baseURL string) *Handler {
 	return &Handler{
 		service: s,
+		baseURL: baseURL,
 	}
 }
