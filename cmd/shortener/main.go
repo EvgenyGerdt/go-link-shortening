@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/EvgenyGerdt/go-link-shortening.git/internal/config"
@@ -15,8 +14,6 @@ func main() {
 	cfg := config.NewConfig()
 	router := gin.Default()
 
-	fmt.Printf("Config BaseURL: %q\n", cfg.BaseURL)
-
 	// Repositories
 	linkRepo := repository.NewLinkRepository()
 	// Services
@@ -26,6 +23,7 @@ func main() {
 
 	router.POST("/", h.ShortenURL)
 	router.GET("/:id", h.ResolveURL)
+	router.GET("/", h.ResolveURL)
 
 	if err := router.Run(cfg.ServerAddress); err != nil {
 		log.Fatal(err)

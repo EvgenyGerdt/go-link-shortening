@@ -104,15 +104,11 @@ func TestHandler_ShortenURL(t *testing.T) {
 				},
 			}
 
-			handler := &Handler{
-				service: service,
-				baseURL: "http://short.test",
-			}
+			handler := NewHandler(service, "http://short.test")
 
 			router := gin.New()
 			router.POST("/", handler.ShortenURL)
 
-			// Создаём HTTP-запрос
 			req := httptest.NewRequest(
 				http.MethodPost,
 				"/",

@@ -23,7 +23,7 @@ func TestHandler_ResolveURL(t *testing.T) {
 		{
 			name:               "missing id",
 			id:                 "",
-			expectedStatusCode: http.StatusNotFound,
+			expectedStatusCode: http.StatusBadRequest,
 			serviceCalled:      false,
 		},
 		{
@@ -72,13 +72,11 @@ func TestHandler_ResolveURL(t *testing.T) {
 				},
 			}
 
-			handler := &Handler{
-				service: service,
-				baseURL: "http://short.test",
-			}
+			handler := NewHandler(service, "http://short.test")
 
 			router := gin.New()
 			router.GET("/:id", handler.ResolveURL)
+			router.GET("/", handler.ResolveURL)
 
 			req := httptest.NewRequest(
 				http.MethodGet,

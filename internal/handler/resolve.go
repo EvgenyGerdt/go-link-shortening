@@ -13,7 +13,9 @@ func (h *Handler) ResolveURL(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
+
 	url, err := h.service.ResolveURL(id)
+
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
